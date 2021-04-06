@@ -84,7 +84,7 @@ class VersionPlugin(ApplicationPlugin):
             daily_patches = 0
 
         try:
-            return_version = datetime.datetime.strptime(version, '%Y.%d.%m').date()
+            return_version = datetime.datetime.strptime(version, '%Y.%m.%d').date()
         except ValueError:
             return_version = datetime.date.today()
 
