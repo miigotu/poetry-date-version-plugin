@@ -14,3 +14,18 @@ Further implement the `poetry version` command.
 ___
 
 All contribution is welcome, and if you use my code or idea elsewhere please give credits. I hope for this project to be precise and uncomplicated, so the feature set should be fairly targeted (I even debated not allowing an external write_to version file and only supporting toml.)
+
+```bash
+pip install cleo==1.0.0a1
+pip install git+https://github.com/python-poetry/poetry
+pip install git+https://github.com/miigotu/poetry-date-version-plugin
+
+```
+```toml
+[tool.poetry.plugins."poetry.application.plugin"]
+plugin = "poetry_date_version_plugin.plugin:VersionPlugin"
+
+[tool.version-plugin]
+write_to = 'yourproject/version.py'
+regex = '__version__ = "{version}"'
+```
