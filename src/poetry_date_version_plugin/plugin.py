@@ -40,6 +40,7 @@ class VersionPlugin(ApplicationPlugin):
 
     def write_file(self, version):
         if not self.out_file.exists():
+            self.out_file.write_text(self.regex.format(version=version))
             return
 
         lines = self.out_file.read_text().splitlines()
