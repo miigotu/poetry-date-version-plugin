@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "poetry-date-version-plugin"
+version = "2021.6.4-3"
+description = ""
+authors = ["Dustyn Gibson <miigotu@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.6,<4.0"
+poetry = ">=1.2.0a0"
+cleo = "^1.0.0a1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.plugins."poetry.application.plugin"]
+plugin = "poetry_date_version_plugin.plugin:VersionPlugin"
+
+[tool.version-plugin]
+write_to = 'src/poetry_date_version_plugin/__init__.py'
+regex = '__version__ = "{version}"'
