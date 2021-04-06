@@ -72,7 +72,7 @@ class VersionPlugin(ApplicationPlugin):
 
         current_version, daily_patches = self.__parse_version(project_version)
         now = datetime.date.today()
-        if now > current_version or (now == current_version and not daily_patches):
+        if now > current_version:
             return now.strftime('%Y.%-m.%-d')
         else:
             return f"{current_version.strftime('%Y.%-m.%-d')}-{daily_patches + 1}"
