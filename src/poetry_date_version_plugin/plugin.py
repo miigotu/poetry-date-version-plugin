@@ -5,11 +5,9 @@ from cleo.events.event_dispatcher import EventDispatcher
 
 from poetry.console.application import Application
 from poetry.console.commands.build import BuildCommand
-from poetry.console.commands.version import VersionCommand
 
 from poetry.plugins.application_plugin import ApplicationPlugin
 from pathlib import Path
-from tempfile import mktemp
 
 import datetime
 
@@ -24,29 +22,33 @@ class VersionPlugin(ApplicationPlugin):
 
     @property
     def config(self):
-        return self.poetry.pyproject.data['tool']['version-plugin']
+        return self.poetry.pyproject.data.get('tool', {}).get('version-plugin', None)
 
     @property
     def regex(self):
-        return self.config.get('regex', '__version__ = "{version}"')
+        if self.config:
+            return self.config.get('regex', '__version__ = "{version}"\n')
 
     @property
     def out_file(self):
-        return Path(self.config.get('write_to', None)).absolute()
+        destination = self.config.get('write_to', None)
+        if destination:
+            return Path(destination).absolute()
 
     def write_line(self, msg):
         if self.io and self.io.is_debug():
             self.io.write_line(f"<debug>{msg}</debug>")
 
     def write_file(self, version):
-        if not self.out_file.exists():
-            self.out_file.write_text(self.regex.format(version=version))
-            return
+        if self.regex and self.out_file:
+            if not self.out_file.exists():
+                self.out_file.write_text(self.regex.format(version=version))
+                return
 
-        lines = self.out_file.read_text().splitlines()
-        with open(self.out_file, 'w') as fp:
-            for line in lines:
-                fp.write(line if not line.strip().startswith(self.regex.split('=')[0].strip()) else self.regex.format(version=version))
+            lines = self.out_file.read_text().splitlines()
+            with open(self.out_file, 'w') as fp:
+                for line in lines:
+                    fp.write(line if not line.strip().startswith(self.regex.split('=')[0].strip()) else self.regex.format(version=version))
 
 
     def activate(self, application: Application):
@@ -54,7 +56,7 @@ class VersionPlugin(ApplicationPlugin):
 
     def set_custom_version(self, event: ConsoleCommandEvent, event_name: str, dispatcher: EventDispatcher) -> None:
         self.command = event.command
-        if not isinstance(self.command, (VersionCommand, BuildCommand)):
+        if not isinstance(self.command, BuildCommand):
             return
 
         self.io = event.io
@@ -74,6 +76,8 @@ class VersionPlugin(ApplicationPlugin):
         now = datetime.date.today()
         if now > current_version:
             return now.strftime('%Y.%-m.%-d')
+        elif not daily_patches:
+            return f"{current_version.strftime('%Y.%-m.%-d')}"
         else:
             return f"{current_version.strftime('%Y.%-m.%-d')}-{daily_patches + 1}"
 
