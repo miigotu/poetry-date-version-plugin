@@ -11,6 +11,7 @@ from pathlib import Path
 
 import datetime
 
+
 class VersionPlugin(ApplicationPlugin):
     def __init__(self):
         self.command = None
@@ -22,18 +23,24 @@ class VersionPlugin(ApplicationPlugin):
 
     @property
     def config(self):
-        return self.poetry.pyproject.data.get('tool', {}).get('version-plugin', None)
+        return self.poetry.pyproject.data.get("tool", {}).get("version-plugin", None)
 
     @property
     def regex(self):
         if self.config:
-            return self.config.get('regex', '__version__ = "{version}"\n')
+            return self.config.get("regex", '__version__ = "{version}"\n')
 
     @property
     def out_file(self):
-        destination = self.config.get('write_to', None)
+        destination = self.config.get("write_to", None)
         if destination:
             return Path(destination).absolute()
+
+    @property
+    def make_tag(self):
+        should_tag = self.config.get("git_tag", False)
+        if should_tag:
+            pass
 
     def write_line(self, msg):
         if self.io and self.io.is_debug():
@@ -46,10 +53,9 @@ class VersionPlugin(ApplicationPlugin):
                 return
 
             lines = self.out_file.read_text().splitlines()
-            with open(self.out_file, 'w') as fp:
+            with open(self.out_file, "w") as fp:
                 for line in lines:
-                    fp.write(line if not line.strip().startswith(self.regex.split('=')[0].strip()) else self.regex.format(version=version))
-
+                    fp.write(line + "\n" if not line.strip().startswith(self.regex.split("=")[0].strip()) else self.regex.format(version=version))
 
     def activate(self, application: Application):
         application.event_dispatcher.add_listener(COMMAND, self.set_custom_version)
@@ -64,31 +70,31 @@ class VersionPlugin(ApplicationPlugin):
         version = self.get_custom_version()
         self.write_line(f"Setting package version to <b>{version}</b>")
         self.command.poetry.package.set_version(version)
-        self.poetry.pyproject.poetry_config['version'] = version
+        self.poetry.pyproject.poetry_config["version"] = version
         self.command.poetry.pyproject.save()
 
         self.write_file(version)
 
     def get_custom_version(self) -> str:
-        project_version = self.poetry.pyproject.poetry_config['version']
+        project_version = self.poetry.pyproject.poetry_config["version"]
 
         current_version, daily_patches = self.__parse_version(project_version)
         now = datetime.date.today()
         if now > current_version:
-            return now.strftime('%Y.%-m.%-d')
+            return now.strftime("%Y.%-m.%-d")
         elif not daily_patches:
             return f"{current_version.strftime('%Y.%-m.%-d')}"
         else:
             return f"{current_version.strftime('%Y.%-m.%-d')}-{daily_patches + 1}"
 
     def __parse_version(self, version: str):
-        if '-' in version:
-            version, daily_patches = version.split('-', 1)
+        if "-" in version:
+            version, daily_patches = version.split("-", 1)
         else:
             daily_patches = 0
 
         try:
-            return_version = datetime.datetime.strptime(version, '%Y.%m.%d').date()
+            return_version = datetime.datetime.strptime(version, "%Y.%m.%d").date()
         except ValueError:
             return_version = datetime.date.today()
 

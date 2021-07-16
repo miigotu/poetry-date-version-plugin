@@ -1,16 +1,17 @@
 [tool.poetry]
 name = "poetry-date-version-plugin"
-version = "2021.7.16-3"
+version = "2021.7.16-6"
 description = ""
 authors = ["Dustyn Gibson <miigotu@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.6,<4.0"
+python = ">=3.6.2,<4.0"
 poetry = ">=1.2.0a0"
 cleo = "^1.0.0a1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
+black = "^21.6-beta.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -22,3 +23,8 @@ plugin = "poetry_date_version_plugin.plugin:VersionPlugin"
 [tool.version-plugin]
 write_to = 'src/poetry_date_version_plugin/__init__.py'
 regex = '__version__ = "{version}"'
+
+[tool.black]
+line-length = 160
+target_version = ['py38']
+include = '\.pyi?$'
